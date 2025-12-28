@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruang Dengar - Ruang Aman untuk Bercerita</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="landing-page">
+  <div class="landing-container">
+    <header class="landing-header">
+      <div class="logo">
+        <img src="assets/logo/logo-imadiksi.jpg" alt="Logo Imadiksi" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; display: block;">
+        <span>Ruang Dengar</span>
+      </div>
+      <h1 class="landing-title">Ruang Aman untuk Bercerita</h1>
+      <p class="landing-subtitle">
+        Tempat berbagi cerita, menulis jurnal, dan menemukan dukungan tanpa penilaian.
+      </p>
+    </header>
+
+    <div class="login-card">
+      <!-- Login Mode Tabs -->
+      <div class="login-tabs">
+        <button type="button" class="login-tab active" data-mode="user">
+          <svg style="width: 18px; height: 18px; margin-right: 6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+          Pengguna
+        </button>
+        <button type="button" class="login-tab" data-mode="companion">
+          <svg style="width: 18px; height: 18px; margin-right: 6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          Teman Ngobrol
+        </button>
+      </div>
+
+      <!-- User Login Form -->
+      <form id="loginForm" class="login-form active">
+        <div class="form-group">
+          <label class="form-label" for="inviteCode">Kode Undangan</label>
+          <input 
+            type="text" 
+            id="inviteCode" 
+            class="form-input"
+            placeholder="Masukkan kode undangan"
+            required
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="displayName">Nama Panggilan</label>
+          <input 
+            type="text" 
+            id="displayName" 
+            class="form-input"
+            placeholder="Pilih nama panggilanmu"
+            minlength="2"
+            maxlength="50"
+            required
+            autocomplete="off"
+          >
+          <p class="form-hint">Nama ini akan terlihat oleh pengguna lain di chat</p>
+        </div>
+
+        <button type="submit" id="loginBtn" class="btn btn-primary btn-block btn-lg">
+          Masuk ke SafeSpace
+        </button>
+
+        <div id="loginError" class="login-error" hidden></div>
+      </form>
+
+      <!-- Companion Login Form -->
+      <form id="companionLoginForm" class="login-form">
+        <div class="form-group">
+          <label class="form-label" for="companionUsername">Username</label>
+          <input 
+            type="text" 
+            id="companionUsername" 
+            class="form-input"
+            placeholder="Username teman ngobrol"
+            required
+            autocomplete="username"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="companionPassword">Password</label>
+          <input 
+            type="password" 
+            id="companionPassword" 
+            class="form-input"
+            placeholder="Masukkan password"
+            required
+            autocomplete="current-password"
+          >
+        </div>
+
+        <button type="submit" id="companionLoginBtn" class="btn btn-primary btn-block btn-lg">
+          Masuk sebagai Teman Ngobrol
+        </button>
+
+        <div id="companionLoginError" class="login-error" hidden></div>
+      </form>
+    </div>
+
+    <div class="disclaimer-box">
+      <p class="disclaimer-title">Penting untuk Diketahui</p>
+      <p class="disclaimer-text">
+        SafeSpace adalah platform dukungan sebaya dan bukan pengganti layanan kesehatan mental profesional. 
+        Jika Anda mengalami krisis atau memiliki pikiran untuk menyakiti diri sendiri, 
+        segera hubungi layanan darurat atau profesional kesehatan mental.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Check if already logged in
+    (async () => {
+      try {
+        // Check user login
+        const res = await fetch('/api/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user) {
+            if (data.user.hasConsented) {
+              window.location.href = '/app.html';
+            } else {
+              window.location.href = '/onboarding.html';
+            }
+            return;
+          }
+        }
+        
+        // Check companion login
+        const companionRes = await fetch('/api/companion/me');
+        if (companionRes.ok) {
+          const companionData = await companionRes.json();
+          if (companionData.authenticated) {
+            window.location.href = '/companion.html';
+            return;
+          }
+        }
+      } catch (e) {
+        // Not logged in, stay on landing page
+      }
+    })();
+
+    // Handle login mode tabs
+    const loginTabs = document.querySelectorAll('.login-tab');
+    const loginForms = document.querySelectorAll('.login-form');
+
+    loginTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const mode = tab.dataset.mode;
+        
+        // Update active tab
+        loginTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Show corresponding form
+        loginForms.forEach(form => {
+          if ((mode === 'user' && form.id === 'loginForm') ||
+              (mode === 'companion' && form.id === 'companionLoginForm')) {
+            form.classList.add('active');
+          } else {
+            form.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    // Handle user login form
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const loginBtn = document.getElementById('loginBtn');
+      const errorDiv = document.getElementById('loginError');
+      
+      const inviteCode = document.getElementById('inviteCode').value.trim();
+      const displayName = document.getElementById('displayName').value.trim();
+
+      // Disable button
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Memproses...';
+      errorDiv.hidden = true;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ inviteCode, displayName }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Login gagal');
+        }
+
+        // Redirect based on consent status
+        if (data.user.hasConsented) {
+          window.location.href = '/app.html';
+        } else {
+          window.location.href = '/onboarding.html';
+        }
+
+      } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.hidden = false;
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Masuk ke SafeSpace';
+      }
+    });
+
+    // Handle companion login form
+    document.getElementById('companionLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const loginBtn = document.getElementById('companionLoginBtn');
+      const errorDiv = document.getElementById('companionLoginError');
+      
+      const username = document.getElementById('companionUsername').value.trim();
+      const password = document.getElementById('companionPassword').value;
+
+      // Disable button
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Memproses...';
+      errorDiv.hidden = true;
+
+      try {
+        const res = await fetch('/api/companion/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+          credentials: 'include'
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Login gagal');
+        }
+
+        // Redirect to companion dashboard
+        window.location.href = '/companion.html';
+
+      } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.hidden = false;
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Masuk sebagai Teman Ngobrol';
+      }
+    });
+  </script>
+</body>
+</html>

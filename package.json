@@ -1,0 +1,29 @@
+{
+  "name": "ruang-dengar",
+  "version": "1.0.0",
+  "description": "Ruang Dengar - Ruang Aman untuk Bercerita (Mental Health Support Space)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "start": "vercel dev"
+  },
+  "keywords": [
+    "mental-health",
+    "support",
+    "community",
+    "chat",
+    "ruang-dengar"
+  ],
+  "author": "Imadiksi",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.89.0",
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

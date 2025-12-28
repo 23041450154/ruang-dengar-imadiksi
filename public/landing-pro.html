@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeSpace - Ruang Aman untuk Bercerita</title>
+  <link rel="stylesheet" href="styles-pro.css">
+</head>
+<body class="landing-page">
+  <div class="landing-container">
+    <header class="landing-header">
+      <div class="logo">
+        <div class="logo-icon">SS</div>
+        <span>SafeSpace</span>
+      </div>
+      <h1 class="landing-title">Ruang Aman untuk Bercerita</h1>
+      <p class="landing-subtitle">
+        Tempat berbagi cerita, menulis jurnal, dan menemukan dukungan tanpa penilaian.
+      </p>
+    </header>
+
+    <div class="login-card">
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="inviteCode">Kode Undangan</label>
+          <input 
+            type="text" 
+            id="inviteCode" 
+            class="form-input"
+            placeholder="Masukkan kode undangan"
+            required
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="displayName">Nama Panggilan</label>
+          <input 
+            type="text" 
+            id="displayName" 
+            class="form-input"
+            placeholder="Pilih nama panggilanmu"
+            minlength="2"
+            maxlength="50"
+            required
+            autocomplete="off"
+          >
+          <p class="form-hint">Nama ini akan terlihat oleh pengguna lain di chat</p>
+        </div>
+
+        <button type="submit" id="loginBtn" class="btn btn-primary btn-block btn-lg">
+          Masuk ke SafeSpace
+        </button>
+
+        <div id="loginError" class="login-error" hidden></div>
+      </form>
+    </div>
+
+    <div class="disclaimer-box">
+      <p class="disclaimer-title">Penting untuk Diketahui</p>
+      <p class="disclaimer-text">
+        SafeSpace adalah platform dukungan sebaya dan bukan pengganti layanan kesehatan mental profesional. 
+        Jika Anda mengalami krisis atau memiliki pikiran untuk menyakiti diri sendiri, 
+        segera hubungi layanan darurat atau profesional kesehatan mental.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Check if already logged in
+    (async () => {
+      try {
+        const res = await fetch('/api/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user) {
+            if (data.user.hasConsented) {
+              window.location.href = '/app.html';
+            } else {
+              window.location.href = '/onboarding.html';
+            }
+          }
+        }
+      } catch (e) {
+        // Not logged in, stay on landing page
+      }
+    })();
+
+    // Handle login form
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const loginBtn = document.getElementById('loginBtn');
+      const errorDiv = document.getElementById('loginError');
+      
+      const inviteCode = document.getElementById('inviteCode').value.trim();
+      const displayName = document.getElementById('displayName').value.trim();
+
+      // Disable button
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Memproses...';
+      errorDiv.hidden = true;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ inviteCode, displayName }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Login gagal');
+        }
+
+        // Redirect based on consent status
+        if (data.user.hasConsented) {
+          window.location.href = '/app.html';
+        } else {
+          window.location.href = '/onboarding.html';
+        }
+
+      } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.hidden = false;
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Masuk ke SafeSpace';
+      }
+    });
+  </script>
+</body>
+</html>

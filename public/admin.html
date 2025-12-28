@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - SafeSpace</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa;
+    }
+
+    .admin-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .admin-header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .admin-user {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .admin-user-info {
+      text-align: right;
+    }
+
+    .admin-user-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .admin-user-role {
+      font-size: 0.75rem;
+      opacity: 0.9;
+    }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: background 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .admin-container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .stat-label {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .welcome-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 2rem;
+    }
+
+    .welcome-section h1 {
+      font-size: 1.75rem;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-section p {
+      color: #6b7280;
+      font-size: 1rem;
+    }
+
+    .loading-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #f5f7fa;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .quick-actions {
+      background: white;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .quick-actions h2 {
+      font-size: 1.25rem;
+      color: #1f2937;
+      margin-bottom: 1rem;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .action-btn {
+      padding: 1rem;
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      text-decoration: none;
+      color: #1f2937;
+      font-weight: 500;
+    }
+
+    .action-btn:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .admin-header-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .admin-container {
+        padding: 0 1rem;
+      }
+
+      .dashboard-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <div id="adminContent" style="display: none;">
+    <header class="admin-header">
+      <div class="admin-header-content">
+        <div class="admin-logo">
+          🔐 <span>SafeSpace Admin</span>
+        </div>
+        <div class="admin-user">
+          <div class="admin-user-info">
+            <div class="admin-user-name" id="adminName">Admin</div>
+            <div class="admin-user-role" id="adminRole">Administrator</div>
+          </div>
+          <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="admin-container">
+      <div class="welcome-section">
+        <h1>Selamat Datang, <span id="welcomeName">Admin</span>!</h1>
+        <p>Kelola platform SafeSpace dari dashboard ini</p>
+      </div>
+
+      <div class="dashboard-stats">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-label">Total Pengguna</div>
+          <div class="stat-value" id="totalUsers">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💬</div>
+          <div class="stat-label">Chat Sessions</div>
+          <div class="stat-value" id="totalSessions">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div class="stat-label">Journal Entries</div>
+          <div class="stat-value" id="totalJournals">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎭</div>
+          <div class="stat-label">Mood Entries</div>
+          <div class="stat-value" id="totalMoods">-</div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="action-grid">
+          <a href="/app.html" class="action-btn">📱 Lihat App</a>
+          <a href="/companion.html" class="action-btn">💬 Companion Panel</a>
+          <div class="action-btn">📊 Reports</div>
+          <div class="action-btn">⚙️ Settings</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const loadingScreen = document.getElementById('loadingScreen');
+    const adminContent = document.getElementById('adminContent');
+    const adminNameEl = document.getElementById('adminName');
+    const adminRoleEl = document.getElementById('adminRole');
+    const welcomeNameEl = document.getElementById('welcomeName');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Check authentication
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/admin/me', {
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated && data.admin) {
+            // Set admin info
+            adminNameEl.textContent = data.admin.name || data.admin.username;
+            adminRoleEl.textContent = data.admin.role || 'Administrator';
+            welcomeNameEl.textContent = data.admin.name || data.admin.username;
+
+            // Load dashboard data
+            await loadDashboardData();
+
+            // Show content
+            loadingScreen.style.display = 'none';
+            adminContent.style.display = 'block';
+            return;
+          }
+        }
+
+        // Not authenticated, redirect to login
+        window.location.href = '/admin-login.html';
+      } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = '/admin-login.html';
+      }
+    }
+
+    // Load dashboard statistics
+    async function loadDashboardData() {
+      // TODO: Implement actual API calls to get statistics
+      // For now, just show placeholders
+      document.getElementById('totalUsers').textContent = '0';
+      document.getElementById('totalSessions').textContent = '0';
+      document.getElementById('totalJournals').textContent = '0';
+      document.getElementById('totalMoods').textContent = '0';
+    }
+
+    // Logout
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await fetch('/api/admin/me', {
+          method: 'POST',
+          credentials: 'include'
+        });
+        window.location.href = '/admin-login.html';
+      } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/admin-login.html';
+      }
+    });
+
+    // Check auth on page load
+    checkAuth();
+  </script>
+</body>
+</html>

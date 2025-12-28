@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeSpace - Persetujuan Pengguna</title>
+  <link rel="stylesheet" href="styles-pro.css">
+</head>
+<body class="onboarding-page">
+  <div class="onboarding-container">
+    <div class="onboarding-card">
+      <header class="onboarding-header">
+        <div class="logo">
+          <div class="logo-icon">SS</div>
+          <span>SafeSpace</span>
+        </div>
+        <h1 class="onboarding-title">Selamat Datang</h1>
+        <p class="text-muted">Sebelum melanjutkan, mohon baca dan setujui panduan komunitas kami.</p>
+      </header>
+
+      <section class="guidelines-section">
+        <h2 class="guidelines-title">Panduan Komunitas</h2>
+        <ul class="guidelines-list">
+          <li>
+            <span class="guideline-icon">1</span>
+            <span>Hormati privasi dan perasaan orang lain. Jaga kerahasiaan cerita yang dibagikan.</span>
+          </li>
+          <li>
+            <span class="guideline-icon">2</span>
+            <span>Gunakan bahasa yang sopan dan mendukung. Hindari kata-kata kasar atau menghakimi.</span>
+          </li>
+          <li>
+            <span class="guideline-icon">3</span>
+            <span>Dengarkan dengan empati. Setiap orang memiliki perjalanan yang berbeda.</span>
+          </li>
+          <li>
+            <span class="guideline-icon">4</span>
+            <span>Jangan memberikan saran medis atau diagnosis. Dorong untuk mencari bantuan profesional.</span>
+          </li>
+          <li>
+            <span class="guideline-icon">5</span>
+            <span>Laporkan konten yang tidak pantas agar moderator dapat menindaklanjuti.</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="crisis-box">
+        <h3 class="crisis-title">Peringatan Penting</h3>
+        <p style="font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-4);">
+          Jika kamu sedang dalam krisis atau memiliki pikiran untuk menyakiti diri sendiri, 
+          segera hubungi bantuan profesional:
+        </p>
+        <p class="crisis-contact"><strong>Into The Light:</strong> 119 ext 8</p>
+        <p class="crisis-contact"><strong>Yayasan Pulih:</strong> (021) 788-42580</p>
+        <p class="crisis-contact"><strong>IGD Rumah Sakit terdekat</strong></p>
+      </section>
+
+      <section class="consent-section">
+        <label class="checkbox-label">
+          <input type="checkbox" id="consentCheckbox" required>
+          <span>
+            Saya telah membaca, memahami, dan setuju untuk mengikuti aturan ruang aman ini. 
+            Saya memahami bahwa SafeSpace bukan pengganti layanan kesehatan mental profesional.
+          </span>
+        </label>
+      </section>
+
+      <div class="onboarding-actions">
+        <button id="consentBtn" class="btn btn-primary btn-block btn-lg" disabled>
+          Saya Setuju & Lanjutkan
+        </button>
+        <div id="consentError" class="login-error" hidden></div>
+        <a href="/api/auth/logout" class="logout-link">Keluar dan gunakan akun lain</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check if user is logged in and hasn't consented
+    (async () => {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) {
+          window.location.href = '/landing.html';
+          return;
+        }
+        
+        const data = await res.json();
+        if (data.user?.hasConsented) {
+          window.location.href = '/app.html';
+        }
+      } catch (e) {
+        window.location.href = '/landing.html';
+      }
+    })();
+
+    // Enable/disable consent button based on checkbox
+    const checkbox = document.getElementById('consentCheckbox');
+    const consentBtn = document.getElementById('consentBtn');
+    
+    checkbox.addEventListener('change', () => {
+      consentBtn.disabled = !checkbox.checked;
+    });
+
+    // Handle consent submission
+    consentBtn.addEventListener('click', async () => {
+      const errorDiv = document.getElementById('consentError');
+      
+      consentBtn.disabled = true;
+      consentBtn.textContent = 'Memproses...';
+      errorDiv.hidden = true;
+
+      try {
+        const res = await fetch('/api/me', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'consent' }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Gagal menyimpan persetujuan');
+        }
+
+        window.location.href = '/app.html';
+
+      } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.hidden = false;
+        consentBtn.disabled = false;
+        consentBtn.textContent = 'Saya Setuju & Lanjutkan';
+      }
+    });
+  </script>
+</body>
+</html>
