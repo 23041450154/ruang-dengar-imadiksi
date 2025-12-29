@@ -4,9 +4,7 @@
   "description": "Ruang Dengar - Ruang Aman untuk Bercerita (Mental Health Support Space)",
   "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'No build step required'",
-    "start": "vercel dev"
+    "build": "echo 'No build step required'"
   },
   "keywords": [
     "mental-health",
